@@ -264,3 +264,7 @@ progress {
 progress::-moz-progress-bar {
   background-color: #039603;
 }
+.note{
+  font-size: 2rem;
+  font-style: italic;
+}
