@@ -3,7 +3,7 @@ function FinishScreen({ points, totalPoints, highscore, dispatch }) {
 
   let emoji;
   if (pointsPercentage === 100) emoji = "💯";
-  if (pointsPercentage < 80 && pointsPercentage >= 60) emoji = "💚";
+  if (pointsPercentage < 100 && pointsPercentage >= 60) emoji = "💚";
   if (pointsPercentage < 60) emoji = "💓";
   return (
     <>

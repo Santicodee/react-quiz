@@ -9,6 +9,9 @@ import Questions from "./components/Questions";
 import NextQuestion from "./components/NextQuestion";
 import Progress from "./components/Progress";
 import FinishScreen from "./components/FinishScreen";
+import Footer from "./components/Footer";
+import Timer from "./components/Timer";
+
 const initialState = {
   questions: [],
   status: "loading",
@@ -16,6 +19,7 @@ const initialState = {
   answer: null,
   points: 0,
   highscore: 0,
+  secondsTimer: 15,
 };
 
 function reducer(state, action) {
@@ -27,7 +31,13 @@ function reducer(state, action) {
       return { ...state, status: "error" };
 
     case "start":
-      return { ...state, status: "active", index: 0, points: 0 };
+      return {
+        ...state,
+        status: "active",
+        index: 0,
+        points: 0,
+        secondsTimer: 15,
+      };
     case "newAnswer":
       const question = state.questions.at(state.index);
       return {
@@ -39,7 +49,12 @@ function reducer(state, action) {
             : state.points,
       };
     case "nextQuestion":
-      return { ...state, index: state.index + 1, answer: null };
+      return {
+        ...state,
+        index: state.index + 1,
+        answer: null,
+        secondsTimer: 15,
+      };
     case "finish":
       return {
         ...state,
@@ -48,14 +63,28 @@ function reducer(state, action) {
         highscore:
           state.points > state.highscore ? state.points : state.highscore,
       };
+    case "showAnswer":
+      const show = state.questions.at(state.index);
+      return {
+        ...state,
+        secondsTimer:
+          state.secondsTimer === 0
+            ? 0
+            : state.secondsTimer - 1 && state.answer != null
+            ? 0
+            : state.secondsTimer - 1,
+        answer: state.secondsTimer === 0 ? show.correctOption : state.answer,
+      };
     default:
       throw new Error("Action unknown");
   }
 }
 
 function App() {
-  const [{ questions, status, index, answer, points, highscore }, dispatch] =
-    useReducer(reducer, initialState);
+  const [
+    { questions, status, index, answer, points, highscore, secondsTimer },
+    dispatch,
+  ] = useReducer(reducer, initialState);
 
   useEffect(function () {
     fetch("http://localhost:8000/questions")
@@ -95,13 +124,21 @@ function App() {
               />
             </>
           )}
+          <Footer>
+            {secondsTimer === 0 && (
+              <NextQuestion
+                dispatch={dispatch}
+                answer={answer}
+                numberOfQuestions={questions.length}
+                index={index}
+              />
+            )}
 
-          <NextQuestion
-            dispatch={dispatch}
-            answer={answer}
-            numberOfQuestions={questions.length}
-            index={index}
-          />
+            {status === "active" && (
+              <Timer dispatch={dispatch} secondsTimer={secondsTimer} />
+            )}
+          </Footer>
+
           {status === "finished" && (
             <FinishScreen
               points={points}
